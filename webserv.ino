@@ -8,12 +8,11 @@ void setup(){
 
   //Serial and SD initialization
   Serial.begin(9600);
-  Serial.print("SD ");
-  if (!env.sd.begin(4, SPI_FULL_SPEED)){
+  Serial.println("SD");
+  while (!env.sd.begin(4, SPI_FULL_SPEED)){
     Serial.println("KO");
-  } else {
-    Serial.println("OK");
   }
+  Serial.println("OK");
 
 
   //Ethernet initialization
