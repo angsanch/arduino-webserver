@@ -59,6 +59,8 @@ Locations of files on the SD card. The dynamic configuration explanation below a
 
 - **DEFAULT_FILE** The file read when a directory is requested.
 
+- **IP_FILE** File where the IP should be found
+
 #### Other
 
 - **DEFAULT_CONTENT_TYPE** The content type sent if the requested content type does not exist.
@@ -69,7 +71,7 @@ Locations of files on the SD card. The dynamic configuration explanation below a
 
 Configuration regarding the connection with clients.
 
-- **ip** The IP your server will use. Ensure it is usable on your network.
+- **ip** The IP your server will use. Ensure it is usable on your network. If this file is not present DHCP will be used.
 
 - **port** The port your server will use. It is recommended to use port 80, the standard port for HTTP, but you can use any port in the range `[0-65535]`.
 

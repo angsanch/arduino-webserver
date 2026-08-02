@@ -16,23 +16,27 @@ void setup(){
 
 
   //Ethernet initialization
+  //MAC setup
+  byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
   // IP
-  file = env.sd.open("ip", FILE_READ);
-  int ip_list[4];
-  for (int i = 0; i < 4; i ++){
-    null_terminate(env.buff, file.readBytesUntil('.', env.buff, 4));
-    ip_list[i] = atoi(env.buff);
+  file = env.sd.open(IP_FILE, FILE_READ);
+  if (!file) {
+    Ethernet.begin(mac);
+  } else {
+    int ip_list[4];
+    for (int i = 0; i < 4; i ++){
+      null_terminate(env.buff, file.readBytesUntil('.', env.buff, 4));
+      ip_list[i] = atoi(env.buff);
+    }
+    file.close();
+    IPAddress ip (ip_list[0], ip_list[1], ip_list[2], ip_list[3]);
+    Ethernet.begin(mac, ip);
   }
-  file.close();
-  IPAddress ip (ip_list[0], ip_list[1], ip_list[2], ip_list[3]);
   //Get port
   file = env.sd.open("port", FILE_READ);
   null_terminate(env.buff, file.readBytes(env.buff, BUFF_SIZE));
   unsigned int port = atol(env.buff);
-  //MAC setup
-  byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
   //Server setup
-  Ethernet.begin(mac, ip);
   server = EthernetServer(port);
   server.begin ();
 

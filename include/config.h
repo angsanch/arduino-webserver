@@ -9,5 +9,6 @@
 //#  define CONTENT_TYPE_DIR "/ctype/"
 //#  define DEFAULT_CONTENT_TYPE "text/plain"
 //#  define DEFAULT_FILE "index.htm"
+//#  define IP_FILE "/ip"
 
 #endif

@@ -30,6 +30,9 @@
 # ifndef DEFAULT_FILE
 #  define DEFAULT_FILE "index.htm"
 # endif
+# ifndef IP_FILE
+#  define IP_FILE "/ip"
+# endif
 
 enum http_methods {
   NOT,
