@@ -67,7 +67,7 @@ int recieve_client(client *c);
 void handshake(client *c);
 void send_payload(void);
 void end_client(client *c);
-void send_file(EthernetClient *client, File32 *file);
+int send_file(EthernetClient *client, char *path);
 
 void report_entry(client *c);
 void report_serve(client *c);

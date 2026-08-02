@@ -65,6 +65,6 @@ void report_post(client *c)
     Serial.write(env.buff, loaded);
     if (loaded < BUFF_SIZE)
       Serial.println();
-      open = false;
+    open = false;
   }
 }
