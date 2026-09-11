@@ -39,3 +39,6 @@ private:
 public:
 	void init() { setBuffer(mBuffer, buffSize); }
 };
+
+template<size_t buffSize>
+char Buffer<buffSize>::mBuffer[];
