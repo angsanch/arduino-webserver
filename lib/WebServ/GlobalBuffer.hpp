@@ -3,6 +3,11 @@
 #include <stddef.h>
 
 class GlobalBuffer {
+private:
+	static char mFallback;
+
+	static inline void setFallback() { setBuffer(&mFallback, 1); }
+
 protected:
 	static char *mData;
 	static size_t mSize;
@@ -14,8 +19,16 @@ protected:
 	}
 
 public:
-	inline char *raw() { return (mData); }
-	inline size_t size() { return (mSize); }
+	inline static char *raw() {
+		if (!mData) setFallback();
+		return (mData);
+	}
+	inline static size_t size() {
+		if (!mData) setFallback();
+		return (mSize);
+	}
+
+	operator char *(){ return (raw()); }
 };
 
 template <size_t buffSize>
@@ -24,7 +37,5 @@ private:
 	static char mBuffer[buffSize];
 
 public:
-	void init() {
-		GlobalBuffer().setBuffer(mBuffer, buffSize);
-	}
+	void init() { setBuffer(mBuffer, buffSize); }
 };
