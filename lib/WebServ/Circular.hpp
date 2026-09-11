@@ -1,4 +1,6 @@
-#include <stdlib.h>
+#pragma once
+
+#include <stddef.h>
 
 template<typename T, size_t arrSize>
 class Circular {
