@@ -19,11 +19,13 @@ protected:
 	}
 
 public:
-	inline static char *raw() {
+	inline static char *raw()
+	{
 		if (!mData) setFallback();
 		return (mData);
 	}
-	inline static size_t size() {
+	inline static size_t size()
+	{
 		if (!mData) setFallback();
 		return (mSize);
 	}

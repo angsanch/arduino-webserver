@@ -11,7 +11,8 @@ private:
 
 public:
 	Circular() = default;
-	~Circular(){
+	~Circular()
+	{
 		while (size())
 			pop_front();
 	}
