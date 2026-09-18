@@ -2,7 +2,11 @@
 
 #include <WebServer.hpp>
 
-using WebServ = WebServer<CLIENTS>;
+ServerEntry sdcardReader = {[](WebServerHandle &, EthernetClient &){Serial.println("client");}, {true, UNRECOGNISED}, {"/"}};
+
+using WebServ = WebServer<CLIENTS, SdFat,
+	&sdcardReader
+>;
 
 SdFat sd;
 WebServ server;
@@ -80,5 +84,5 @@ void loop(){
 		was_idle = false;
 */
 	delay(1000);
-	Serial.println("loop");
+	server.accept();
 }

@@ -10,4 +10,5 @@ private:
 
 public:
 	WebClient() = default;
+	~WebClient();
 };
