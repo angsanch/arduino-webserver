@@ -2,7 +2,8 @@
 
 #include <WebServer.hpp>
 
-ServerEntry sdcardReader = {[](WebServerHandle &, EthernetClient &){Serial.println("client");}, {true, UNRECOGNISED}, {"/"}};
+
+ServerEntry sdcardReader = {WEB_PATH("/"), {true, HTTP_POST}, [](WebServerHandle &, EthernetClient &){Serial.println("client"); Serial.println(&GlobalBuffer().raw()[0]);}};
 
 using WebServ = WebServer<CLIENTS, SdFat,
 	&sdcardReader
@@ -10,9 +11,10 @@ using WebServ = WebServer<CLIENTS, SdFat,
 
 SdFat sd;
 WebServ server;
-char buff[BUFF_SIZE];
+Buffer<BUFF_SIZE> buff;
 
 void setup(){
+	buff.init();
 	File32 file;
 
 	//Serial and SD initialization
@@ -61,6 +63,7 @@ void setup(){
 	server.setSendCycles(file.parseInt());
 	file.close();
 	// env.header = env.sd.open("header", FILE_READ);
+
 }
 
 void loop(){

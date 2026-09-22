@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WebClient.hpp"
+#include "GlobalBuffer.hpp"
 
 #include <SdFat.h>
 #include <Ethernet.h>
@@ -9,7 +10,12 @@
 
 #include <avr/pgmspace.h>
 
-#define FLASHSTRING(name, content) const char name[] PROGNAME = content;
+#define FLASHSTRING(name, content) const char name[] PROGMEM = content;
+
+#define WEB_PATH(x) ([]() -> const char * { \
+    static FLASHSTRING(str, x); \
+    return (str); \
+}())
 
 using FlashString = __FlashStringHelper *;
 
@@ -19,17 +25,31 @@ public:
 		virtual void getFile(File32 &file, const char *path) = 0;
 };
 
-enum HTTPMethod {
-	UNRECOGNISED
-};
+typedef enum HTTPMethod {
+	HTTP_UNRECOGNISED = 0,
+	HTTP_GET          = (1u << 0),
+	HTTP_HEAD         = (1u << 1),
+	HTTP_OPTIONS      = (1u << 2),
+	HTTP_TRACE        = (1u << 3),
+	HTTP_PUT          = (1u << 4),
+	HTTP_DELETE       = (1u << 5),
+	HTTP_POST         = (1u << 6),
+} t_http_method;
+extern const char *const HTTPMethodName[] PROGMEM;
+
+inline t_http_method operator &(t_http_method a, t_http_method b) { return (a & b); }
+inline t_http_method operator |(t_http_method a, t_http_method b) { return (a | b); }
+
+t_http_method stringToMethod(const char *str);
+size_t methodToString(t_http_method method, char *str, size_t size);
 
 struct ServerEntry {
-	void (*callBack)(WebServerHandle &, EthernetClient &);
+	const char *path;
 	struct {
 		bool entrypoint : 1;
 		enum HTTPMethod method : 7;
 	};
-	const char path[] PROGMEM;
+	void (*callBack)(WebServerHandle &, EthernetClient &);
 };
 
 template<size_t clientCount, typename SD = SdFat, ServerEntry *... entries>
@@ -45,8 +65,18 @@ private:
 
 	void clientLanding(EthernetClient &client)
 	{
-		//place holder
-		mEntries[0]->callBack(*this, client);
+		GlobalBuffer buff;
+
+		Serial.println(F("client arrived"));
+		if (!getClientHeader(client, reinterpret_cast<uint8_t *>(buff.raw()), buff.size()))
+			/*manage bad header, response 400*/return ;
+
+		Serial.print((int)buff.raw()[0]);
+		Serial.println((char *)&buff.raw()[1]);
+		for (size_t n = 0; n < buff.size(); n++) {
+			Serial.print((int)(buff.raw()[n]));
+			Serial.print(' ');
+		}
 	}
 
 public:
