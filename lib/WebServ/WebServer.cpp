@@ -24,7 +24,6 @@ t_http_method stringToMethod(const char *str)
 {
 	const size_t count = sizeof(HTTPMethodName) / sizeof(HTTPMethodName[0]);
 
-	Serial.println(str);
 	for (size_t i = 1; i < count; i++) {
 		PGM_P fstr = static_cast<PGM_P>(pgm_read_ptr(&HTTPMethodName[i]));
 

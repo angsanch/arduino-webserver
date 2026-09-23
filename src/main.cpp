@@ -3,7 +3,7 @@
 #include <WebServer.hpp>
 
 
-ServerEntry sdcardReader = {WEB_PATH("/"), {true, HTTP_POST}, [](WebServerHandle &, EthernetClient &){Serial.println("client"); Serial.println(&GlobalBuffer().raw()[0]);}};
+ServerEntry sdcardReader = {WEB_PATH("/"), {true, HTTP_POST | HTTP_HEAD}, [](WebServerHandle &, WebClient &, t_http_method){Serial.println("client"); Serial.println(&GlobalBuffer().raw()[0]);}};
 
 using WebServ = WebServer<CLIENTS, SdFat,
 	&sdcardReader

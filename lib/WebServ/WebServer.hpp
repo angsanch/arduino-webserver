@@ -12,9 +12,9 @@
 
 #define FLASHSTRING(name, content) const char name[] PROGMEM = content;
 
-#define WEB_PATH(x) ([]() -> const char * { \
+#define WEB_PATH(x) ([]() -> PGM_P { \
     static FLASHSTRING(str, x); \
-    return (str); \
+    return (reinterpret_cast<PGM_P>(str)); \
 }())
 
 using FlashString = __FlashStringHelper *;
@@ -37,19 +37,19 @@ typedef enum HTTPMethod {
 } t_http_method;
 extern const char *const HTTPMethodName[] PROGMEM;
 
-inline t_http_method operator &(t_http_method a, t_http_method b) { return (a & b); }
-inline t_http_method operator |(t_http_method a, t_http_method b) { return (a | b); }
+inline t_http_method operator &(t_http_method a, t_http_method b) { return (static_cast<t_http_method>(static_cast<unsigned int>(a) & static_cast<unsigned int>(b))); }
+inline t_http_method operator |(t_http_method a, t_http_method b) { return (static_cast<t_http_method>(static_cast<unsigned int>(a) | static_cast<unsigned int>(b))); }
 
 t_http_method stringToMethod(const char *str);
 size_t methodToString(t_http_method method, char *str, size_t size);
 
 struct ServerEntry {
-	const char *path;
+	PGM_P path;
 	struct {
 		bool entrypoint : 1;
-		enum HTTPMethod method : 7;
+		t_http_method method : 7;
 	};
-	void (*callBack)(WebServerHandle &, EthernetClient &);
+	void (*callBack)(WebServerHandle &, WebClient &, t_http_method);
 };
 
 template<size_t clientCount, typename SD = SdFat, ServerEntry *... entries>
@@ -63,20 +63,31 @@ private:
 	const bool mValid;
 	unsigned int mSendCycles = 32;
 
-	void clientLanding(EthernetClient &client)
+	void clientLanding(WebClient &client)
 	{
 		GlobalBuffer buff;
 
-		Serial.println(F("client arrived"));
-		if (!getClientHeader(client, reinterpret_cast<uint8_t *>(buff.raw()), buff.size()))
+		if (!client.client().getHeader(reinterpret_cast<uint8_t *>(buff.raw()), buff.size()))
 			/*manage bad header, response 400*/return ;
 
-		Serial.print((int)buff.raw()[0]);
-		Serial.println((char *)&buff.raw()[1]);
-		for (size_t n = 0; n < buff.size(); n++) {
-			Serial.print((int)(buff.raw()[n]));
-			Serial.print(' ');
+		const char *path = &buff.raw()[1];
+		for (const auto &i : mEntries) {
+			if (i->entrypoint) {
+				if (strncmp_P(path, i->path, strlen_P(i->path)) != 0)
+					continue ;
+			} else {
+				if (strcmp_P(path, i->path) != 0)
+					continue ;
+			}
+			if (!(i->method & buff.raw()[0])) {
+				// method not supported
+				// destroy client
+				return ;
+			}
+			return (i->callBack(*this, client, buff.raw()[0]));
 		}
+		//404
+		//destroy client
 	}
 
 public:
@@ -115,11 +126,11 @@ public:
 	size_t accept()
 	{
 		size_t count = 0;
-		EthernetClient client;
+		WebClient client;
 
 		while (true) {
-			client = mServer.accept();
-			if (client) {
+			client = WebClient(mServer.accept());
+			if (client.client().valid()) {
 				count ++;
 				clientLanding(client);
 			} else
