@@ -91,8 +91,8 @@ class Dict(Entry):
     @staticmethod
     def pack(fields):
         ordered = sorted(fields.items())
-        left = max((len(key.encode("utf-8")) for key, _ in ordered), default=0)
-        right = max((len(value.encode("utf-8")) for _, value in ordered), default=0)
+        left = max((len(key.encode("utf-8")) for key, _ in ordered), default=0) + 1
+        right = max((len(value.encode("utf-8")) for _, value in ordered), default=0) + 1
         payload = bytearray()
         for key, value in ordered:
             payload += key.encode("utf-8").ljust(left, b"\0")
