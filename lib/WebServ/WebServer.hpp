@@ -84,7 +84,7 @@ private:
 				// destroy client
 				return ;
 			}
-			return (i->callBack(*this, client, buff.raw()[0]));
+			return (i->callBack(*this, client, static_cast<t_http_method>(buff.raw()[0])));
 		}
 		//404
 		//destroy client
@@ -100,9 +100,7 @@ public:
 	: mSd(sd)
 	, mServer(port)
 	, mValid(true)
-	{
-		memset(mClient, 0, sizeof(mClient) / sizeof(mClient[0]));
-	}
+	{}
 
 	template<typename... Args>
 	bool init(Args&&... args) {
@@ -126,10 +124,9 @@ public:
 	size_t accept()
 	{
 		size_t count = 0;
-		WebClient client;
 
 		while (true) {
-			client = WebClient(mServer.accept());
+			WebClient client(mServer.accept());
 			if (client.client().valid()) {
 				count ++;
 				clientLanding(client);

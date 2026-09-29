@@ -31,19 +31,54 @@ size_t WebEthernetClient::discardUntil(char c)
 
 bool WebEthernetClient::getHeader(uint8_t *buff, size_t size)
 {
+	size_t methodLen;
 	size_t pathLen;
 
 	if (size < 16)
 		return (false);
-	if (mClient.readBytesUntil(' ', buff, size) >= size)
-		if (mClient.read() != ' ')
-			return (false);
+	methodLen = mClient.readBytesUntil(' ', buff, size - 1);
+	buff[methodLen] = '\0';
 	buff[0] = stringToMethod(reinterpret_cast<char *>(buff));
 
 	pathLen = mClient.readBytesUntil(' ', &buff[1], size - 2);
-	if (pathLen >= size - 2)
-		if (mClient.read() != ' ')
-			return (false);
 	buff[pathLen + 1] = '\0';
+	return (true);
+}
+
+void WebEthernetClient::writeFlash(const char *flash, size_t len)
+{
+	GlobalBuffer buff;
+	size_t offset = 0;
+
+	while (len - offset > 0) {
+		size_t block = min(len - offset, buff.size());
+
+		memcpy_P(buff.raw(), &flash[offset], block);
+		mClient.write(buff.raw(), block);
+		offset += block;
+	}
+}
+
+static size_t sendUntil(WebEthernetClient &client, char const *flash, int chr)
+{
+	char const *end = strchr_P(flash, chr);
+	size_t len = (end) ? end - flash : strlen_P(flash);
+
+	client.writeFlash(flash, len);
+	return (len);
+}
+
+bool WebEthernetClient::sendHeader(int code)
+{
+	GlobalBuffer buff;
+	size_t offset;
+
+	offset = sendUntil(*this, http_response_header, ';');
+	offset ++;
+	snprintf(buff.raw(), buff.size(), "%d", code);
+	mClient.print(buff.raw());
+	mClient.write(' ');
+	printFlash(http_code.get(buff.raw()));
+	printFlash(&http_response_header[offset]);
 	return (true);
 }

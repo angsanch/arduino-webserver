@@ -39,8 +39,8 @@ class Variable(Entry):
 class String(Entry):
     def __init__(self, name, path):
         self.name = name
-        with open(path, encoding="utf-8") as handle:
-            self.value = handle.read().rstrip("\n")
+        with open(path, encoding="utf-8", newline="") as handle:
+            self.value = handle.read()
 
     @staticmethod
     def escape(text):

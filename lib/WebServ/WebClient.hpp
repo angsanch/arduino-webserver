@@ -3,15 +3,20 @@
 #include <Ethernet.h>
 #include <SdFat.h>
 
+#include "definitions.hpp"
+
 class WebEthernetClient {
 private:
 	EthernetClient mClient;
+
 
 public:
 	WebEthernetClient() = default;
 	WebEthernetClient(EthernetClient &&client)
 	: mClient(static_cast<EthernetClient &&>(client))
-	{}
+	{
+		mClient.setTimeout(4096);
+	}
 	WebEthernetClient(const WebEthernetClient &) = delete;
 	WebEthernetClient &operator=(const WebEthernetClient &) = delete;
 	WebEthernetClient(WebEthernetClient &&) = default;
@@ -21,10 +26,15 @@ public:
 	size_t discardUntil(char c);
 	bool getHeader(uint8_t *buff, size_t size);
 
+	inline void printFlash(const char *flash) { return (writeFlash(flash, strlen_P(flash))); }
+	void writeFlash(const char *flash, size_t len);
+
+	bool sendHeader(int code);
+
 	bool valid() { return (mClient); }
 };
 
-class WebClient : WebEthernetClient {
+class WebClient : public WebEthernetClient {
 private:
 	File32 mFile;
 
