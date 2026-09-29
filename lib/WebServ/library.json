@@ -1,0 +1,10 @@
+{
+    "name": "WebServ",
+    "version": "1.0.0",
+    "description": "Web server library for Arduino with SD card storage",
+    "frameworks": "arduino",
+    "platforms": "*",
+    "build": {
+        "extraScript": "scripts/definitions.py"
+    }
+}
