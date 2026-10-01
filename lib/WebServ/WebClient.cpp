@@ -68,7 +68,7 @@ static size_t sendUntil(WebEthernetClient &client, char const *flash, int chr)
 	return (len);
 }
 
-bool WebEthernetClient::sendHeader(int code)
+WebEthernetClient &WebEthernetClient::sendHeader(int code)
 {
 	GlobalBuffer buff;
 	size_t offset;
@@ -80,5 +80,14 @@ bool WebEthernetClient::sendHeader(int code)
 	mClient.write(' ');
 	printFlash(http_code.get(buff.raw()));
 	printFlash(&http_response_header[offset]);
-	return (true);
+	return (*this);
+}
+
+WebEthernetClient &WebEthernetClient::sendHeaderFieldFlash(const char *name, char const *value)
+{
+	printFlash(name);
+	printFlash(reinterpret_cast<const char *>(F(": ")));
+	printFlash(value);
+	mClient.write('\n');
+	return (*this);
 }

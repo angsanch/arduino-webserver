@@ -29,7 +29,17 @@ public:
 	inline void printFlash(const char *flash) { return (writeFlash(flash, strlen_P(flash))); }
 	void writeFlash(const char *flash, size_t len);
 
-	bool sendHeader(int code);
+	WebEthernetClient &sendHeader(int code);
+	template<typename T>
+	WebEthernetClient &sendHeaderField(const char *name, T value)
+	{
+		printFlash(name);
+		printFlash(reinterpret_cast<const char *>(F(": ")));
+		mClient.println(value);
+		return (*this);
+	}
+	WebEthernetClient &sendHeaderFieldFlash(const char *name, char const *value);
+	void closeHeader() { mClient.write('\n'); }
 
 	bool valid() { return (mClient); }
 };

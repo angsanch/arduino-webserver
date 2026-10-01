@@ -12,7 +12,7 @@
 
 #define FLASHSTRING(name, content) const char name[] PROGMEM = content;
 
-#define WEB_PATH(x) ([]() -> PGM_P { \
+#define GLOBAL_FSTRING(x) ([]() -> PGM_P { \
     static FLASHSTRING(str, x); \
     return (reinterpret_cast<PGM_P>(str)); \
 }())
