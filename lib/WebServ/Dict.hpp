@@ -26,4 +26,6 @@ public:
 
 	PGM_P getFlash(const char *key);
 	PGM_P get(const char *key);
+
+	PGM_P operator[](size_t index);
 };

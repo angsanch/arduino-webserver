@@ -41,3 +41,7 @@ PGM_P Dict::get(const char *key)
 	return (search(key, 0, size(), strcmp_P));
 }
 
+PGM_P Dict::operator[](size_t index)
+{
+	return (&mData[(mKeySize + mValueSize) * index + mKeySize]);
+}
