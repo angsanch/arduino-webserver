@@ -6,9 +6,8 @@
 #include "definitions.hpp"
 
 class WebEthernetClient {
-private:
+protected:
 	EthernetClient mClient;
-
 
 public:
 	WebEthernetClient() = default;
@@ -60,4 +59,6 @@ public:
 	~WebClient();
 
 	inline WebEthernetClient &client() { return (*this); }
+
+	size_t serve();
 };

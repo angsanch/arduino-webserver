@@ -2,6 +2,7 @@
 
 #include "WebClient.hpp"
 #include "GlobalBuffer.hpp"
+#include "Circular.hpp"
 
 #include <SdFat.h>
 #include <Ethernet.h>
@@ -43,6 +44,8 @@ inline t_http_method operator |(t_http_method a, t_http_method b) { return (stat
 t_http_method stringToMethod(const char *str);
 size_t methodToString(t_http_method method, char *str, size_t size);
 
+void staticResponse(WebClient &client, int code);
+
 struct ServerEntry {
 	PGM_P path;
 	struct {
@@ -59,7 +62,7 @@ private:
 
 	SD &mSd;
 	EthernetServer mServer;
-	WebClient mClient[clientCount];
+	Circular<WebClient, clientCount> mClient;
 	const bool mValid;
 	unsigned int mSendCycles = 32;
 
@@ -68,26 +71,30 @@ private:
 		GlobalBuffer buff;
 
 		if (!client.client().getHeader(reinterpret_cast<uint8_t *>(buff.raw()), buff.size()))
-			/*manage bad header, response 400*/return ;
+			return (staticResponse(client, 400));
 
-		const char *path = &buff.raw()[1];
+		char *path = &buff.raw()[1];
 		for (const auto &i : mEntries) {
 			if (i->entrypoint) {
-				if (strncmp_P(path, i->path, strlen_P(i->path)) != 0)
+				size_t len_entry = strlen_P(i->path);
+				size_t len_client = strlen(path);
+				if (pgm_read_byte(&i->path[len_entry - 1]) == '/')
+					len_entry --;
+				if (strncmp_P(path, i->path, len_entry) != 0)
 					continue ;
+				char next = path[len_entry];
+				if (next != '/' && next != '\0')
+					continue ;
+				memmove(path, &path[len_entry], len_client - len_entry + 1);
 			} else {
 				if (strcmp_P(path, i->path) != 0)
 					continue ;
 			}
-			if (!(i->method & buff.raw()[0])) {
-				// method not supported
-				// destroy client
-				return ;
-			}
+			if (!(i->method & buff.raw()[0]))
+				return (staticResponse(client, 405));
 			return (i->callBack(*this, client, static_cast<t_http_method>(buff.raw()[0])));
 		}
-		//404
-		//destroy client
+		return (staticResponse(client, 404));
 	}
 
 public:
@@ -116,10 +123,14 @@ public:
 
 	WebClient *getClientSpot() override
 	{
-		return (nullptr);
+		if (!mClient.emplace_back())
+			return (nullptr);
+		return (&mClient[mClient.size() - 1]);
 	}
 	void getFile(File32 &file, const char *path) override
-	{}
+	{
+		file = mSd.open(path, FILE_READ);
+	}
 
 	size_t accept()
 	{
@@ -134,5 +145,27 @@ public:
 				break ;
 		}
 		return (count);
+	}
+
+	size_t serve(size_t bytes)
+	{
+		size_t served = 0;
+
+		while (served < bytes) {
+			WebClient *client;
+
+			if (mClient.size() == 0)
+				break;
+			client = &mClient[0];
+			while (served < bytes) {
+				size_t chunk = client->serve();
+				if (chunk == 0) {
+					mClient.pop_front();
+					break;
+				}
+				served += chunk;
+			}
+		}
+		return (served);
 	}
 };

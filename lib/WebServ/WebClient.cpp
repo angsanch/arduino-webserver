@@ -91,3 +91,12 @@ WebEthernetClient &WebEthernetClient::sendHeaderFieldFlash(const char *name, cha
 	mClient.write('\n');
 	return (*this);
 }
+
+size_t WebClient::serve()
+{
+	GlobalBuffer buff;
+	size_t read = mFile.read(buff.raw(), buff.size());
+
+	mClient.write(buff.raw(), read);
+	return (read);
+}
