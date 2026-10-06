@@ -59,6 +59,11 @@ void WebEthernetClient::writeFlash(const char *flash, size_t len)
 	}
 }
 
+HeaderHandler WebEthernetClient::header()
+{
+	return (HeaderHandler(*this));
+}
+
 static size_t sendUntil(WebEthernetClient &client, char const *flash, int chr)
 {
 	char const *end = strchr_P(flash, chr);
@@ -68,27 +73,27 @@ static size_t sendUntil(WebEthernetClient &client, char const *flash, int chr)
 	return (len);
 }
 
-WebEthernetClient &WebEthernetClient::sendHeader(int code)
+HeaderHandler &HeaderHandler::send(int code)
 {
 	GlobalBuffer buff;
 	size_t offset;
 
-	offset = sendUntil(*this, http_response_header, ';');
+	offset = sendUntil(mClient, http_response_header, ';');
 	offset ++;
 	snprintf(buff.raw(), buff.size(), "%d", code);
 	mClient.print(buff.raw());
-	mClient.write(' ');
-	printFlash(http_code.get(buff.raw()));
-	printFlash(&http_response_header[offset]);
+	mClient.print(' ');
+	mClient.printFlash(http_code.get(buff.raw()));
+	mClient.printFlash(&http_response_header[offset]);
 	return (*this);
 }
 
-WebEthernetClient &WebEthernetClient::sendHeaderFieldFlash(const char *name, char const *value)
+HeaderHandler &HeaderHandler::sendFieldFlash(const char *name, char const *value)
 {
-	printFlash(name);
-	printFlash(reinterpret_cast<const char *>(F(": ")));
-	printFlash(value);
-	mClient.write('\n');
+	mClient.printFlash(name);
+	mClient.printFlash(reinterpret_cast<const char *>(F(": ")));
+	mClient.printFlash(value);
+	mClient.print('\n');
 	return (*this);
 }
 

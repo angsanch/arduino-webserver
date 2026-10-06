@@ -5,6 +5,8 @@
 
 #include "definitions.hpp"
 
+class HeaderHandler;
+
 class WebEthernetClient {
 protected:
 	EthernetClient mClient;
@@ -28,19 +30,37 @@ public:
 	inline void printFlash(const char *flash) { return (writeFlash(flash, strlen_P(flash))); }
 	void writeFlash(const char *flash, size_t len);
 
-	WebEthernetClient &sendHeader(int code);
 	template<typename T>
-	WebEthernetClient &sendHeaderField(const char *name, T value)
-	{
-		printFlash(name);
-		printFlash(reinterpret_cast<const char *>(F(": ")));
-		mClient.println(value);
-		return (*this);
-	}
-	WebEthernetClient &sendHeaderFieldFlash(const char *name, char const *value);
-	void closeHeader() { mClient.write('\n'); }
+	void print(const T &value)
+	{ mClient.print(value); }
+
+	HeaderHandler header();
 
 	bool valid() { return (mClient); }
+};
+
+class HeaderHandler {
+private:
+	WebEthernetClient &mClient;
+
+public:
+	HeaderHandler(WebEthernetClient &client)
+	: mClient(client)
+	{}
+	~HeaderHandler() { mClient.print('\n'); }
+
+	HeaderHandler &send(int code);
+
+	template<typename T>
+	HeaderHandler &sendField(const char *name, const T &value)
+	{
+		mClient.printFlash(name);
+		mClient.printFlash(reinterpret_cast<const char *>(F(": ")));
+		mClient.print(value);
+		mClient.print('\n');
+		return (*this);
+	}
+	HeaderHandler &sendFieldFlash(const char *name, char const *value);
 };
 
 class WebClient : public WebEthernetClient {

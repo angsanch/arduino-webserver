@@ -37,5 +37,5 @@ size_t methodToString(t_http_method method, char *str, size_t size);
 
 void staticResponse(WebClient &client, int code)
 {
-	client.sendHeader(code);
+	client.header().send(code);
 }
