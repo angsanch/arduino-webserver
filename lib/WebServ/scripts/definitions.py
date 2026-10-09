@@ -66,7 +66,7 @@ class String(Entry):
         return name
 
     def render(self):
-        data = Variable("static const char", f"{self.name}[] PROGMEM", self.escape(self.value))
+        data = Variable("const char", f"{self.name}[] PROGMEM", self.escape(self.value))
         return f"{data.render()}"
 
 class Dict(Entry):
