@@ -138,11 +138,11 @@ public:
 
 		while (true) {
 			WebClient client(mServer.accept());
-			if (client.client().valid()) {
-				count ++;
-				clientLanding(client);
-			} else
+
+			if (!client.client().valid())
 				break ;
+			count ++;
+			clientLanding(client);
 		}
 		return (count);
 	}

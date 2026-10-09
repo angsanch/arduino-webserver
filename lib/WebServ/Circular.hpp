@@ -39,7 +39,7 @@ public:
 
 	void pop_front()
 	{
-		if (mUsed <= arrSize)
+		if (mUsed == 0)
 			return ;
 		(*this)[0].~T();
 		mUsed --;

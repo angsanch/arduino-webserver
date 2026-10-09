@@ -20,8 +20,19 @@ public:
 	}
 	WebEthernetClient(const WebEthernetClient &) = delete;
 	WebEthernetClient &operator=(const WebEthernetClient &) = delete;
-	WebEthernetClient(WebEthernetClient &&) = default;
-	WebEthernetClient &operator=(WebEthernetClient &&) = default;
+	WebEthernetClient(WebEthernetClient &&other)
+	: mClient(other.mClient)
+	{
+		other.mClient = EthernetClient();
+	}
+	WebEthernetClient &operator=(WebEthernetClient &&other)
+	{
+		if (this != &other) {
+			mClient = other.mClient;
+			other.mClient = EthernetClient();
+		}
+		return (*this);
+	}
 	~WebEthernetClient();
 
 	size_t discardUntil(char c);
