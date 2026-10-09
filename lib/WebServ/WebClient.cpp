@@ -80,7 +80,7 @@ HeaderHandler &HeaderHandler::send(int code)
 
 	offset = sendUntil(mClient, http_response_header, ';');
 	offset ++;
-	snprintf(buff.raw(), buff.size(), "%d", code);
+	itoa(code, buff.raw(), 10);
 	mClient.print(buff.raw());
 	mClient.print(' ');
 	mClient.printFlash(http_code.get(buff.raw()));
@@ -93,7 +93,7 @@ HeaderHandler &HeaderHandler::sendFieldFlash(const char *name, char const *value
 	mClient.printFlash(name);
 	mClient.printFlash(reinterpret_cast<const char *>(F(": ")));
 	mClient.printFlash(value);
-	mClient.print('\n');
+	mClient.println();
 	return (*this);
 }
 

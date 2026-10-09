@@ -44,6 +44,7 @@ public:
 	template<typename T>
 	void print(const T &value)
 	{ mClient.print(value); }
+	void println() { mClient.println(); }
 
 	HeaderHandler header();
 
@@ -58,7 +59,7 @@ public:
 	HeaderHandler(WebEthernetClient &client)
 	: mClient(client)
 	{}
-	~HeaderHandler() { mClient.print('\n'); }
+	~HeaderHandler() { mClient.println(); }
 
 	HeaderHandler &send(int code);
 
@@ -68,7 +69,7 @@ public:
 		mClient.printFlash(name);
 		mClient.printFlash(reinterpret_cast<const char *>(F(": ")));
 		mClient.print(value);
-		mClient.print('\n');
+		mClient.println();
 		return (*this);
 	}
 	HeaderHandler &sendFieldFlash(const char *name, char const *value);
