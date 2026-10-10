@@ -64,7 +64,6 @@ private:
 	EthernetServer mServer;
 	Circular<WebClient, clientCount> mClient;
 	const bool mValid;
-	unsigned int mSendCycles = 32;
 
 	void clientLanding(WebClient &client)
 	{
@@ -118,8 +117,6 @@ public:
 	}
 
 	void begin() { mServer.begin(); }
-	void setSendCycles(unsigned int sendCycles) { mSendCycles = sendCycles; }
-
 
 	WebClient *getClientSpot() override
 	{
