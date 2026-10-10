@@ -37,10 +37,16 @@ class Variable(Entry):
         return f"{self.type_name} {self.name} = {{{self.value}}};"
 
 class String(Entry):
-    def __init__(self, name, path):
+    def __init__(self, name, path, crlf=False):
         self.name = name
         with open(path, encoding="utf-8", newline="") as handle:
             self.value = handle.read()
+        if crlf:
+            self.value = self.normalize_newlines(self.value)
+
+    @staticmethod
+    def normalize_newlines(text):
+        return text.replace("\r\n", "\n").replace("\n", "\r\n")
 
     @staticmethod
     def escape(text):
@@ -150,7 +156,7 @@ def generate(project_dir):
     names = set()
     for filename, path in _asset_files(project_dir):
         extension = os.path.splitext(filename)[1]
-        if extension not in (".dict", ".str"):
+        if extension not in (".dict", ".str", ".strr"):
             continue
         name = String.identifier(filename)
         if name in names:
@@ -159,7 +165,7 @@ def generate(project_dir):
         if extension == ".dict":
             scope.add(Dict(name, path))
         else:
-            scope.add(String(name, path))
+            scope.add(String(name, path, crlf=(extension == ".strr")))
     scope.save(OUTPUT_FILE)
 
 
