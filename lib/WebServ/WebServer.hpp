@@ -24,6 +24,7 @@ class WebServerHandle {
 public:
 		virtual WebClient *getClientSpot() = 0;
 		virtual void getFile(File32 &file, const char *path) = 0;
+		virtual bool exists(const char *path) = 0;
 };
 
 typedef enum HTTPMethod {
@@ -127,6 +128,10 @@ public:
 	void getFile(File32 &file, const char *path) override
 	{
 		file = mSd.open(path, FILE_READ);
+	}
+	bool exists(const char *path) override
+	{
+		return (mSd.exists(path));
 	}
 
 	size_t accept()

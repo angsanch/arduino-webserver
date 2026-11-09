@@ -52,6 +52,9 @@ void staticResponse(WebClient &client, int code)
 		case 429:
 			body = http_response_static_429;
 			break ;
+		case 500:
+			body = http_response_static_500;
+			break ;
 		default:
 			break ;
 	}

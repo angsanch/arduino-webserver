@@ -91,6 +91,7 @@ public:
 	~WebClient();
 
 	inline WebEthernetClient &client() { return (*this); }
+	void setFile(File32 &&file) { mFile = static_cast<File32 &&>(file); }
 
 	size_t serve();
 };

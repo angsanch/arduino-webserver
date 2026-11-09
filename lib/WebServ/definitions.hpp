@@ -11,3 +11,4 @@ extern const char http_response_static_400[] PROGMEM;
 extern const char http_response_static_404[] PROGMEM;
 extern const char http_response_static_405[] PROGMEM;
 extern const char http_response_static_429[] PROGMEM;
+extern const char http_response_static_500[] PROGMEM;

@@ -100,8 +100,17 @@ HeaderHandler &HeaderHandler::sendFieldFlash(const char *name, char const *value
 size_t WebClient::serve()
 {
 	GlobalBuffer buff;
-	size_t read = mFile.read(buff.raw(), buff.size());
+	size_t space;
+	int read;
 
+	if (!mClient.connected())
+		return (0);
+	space = mClient.availableForWrite();
+	if (space == 0)
+		return (0);
+	read = mFile.read(buff.raw(), min(space, buff.size()));
+	if (read <= 0)
+		return (0);
 	mClient.write(buff.raw(), read);
 	return (read);
 }
