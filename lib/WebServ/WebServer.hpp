@@ -61,7 +61,7 @@ class WebServer : public WebServerHandle {
 private:
 	ServerEntry *mEntries[sizeof...(entries)] = {entries ...};
 
-	SD &mSd;
+	SD *mSd;
 	EthernetServer mServer;
 	Circular<WebClient, clientCount> mClient;
 	const bool mValid;
@@ -99,12 +99,12 @@ private:
 
 public:
 	WebServer()
-	: mSd(*static_cast<SD *>(nullptr))
+	: mSd(nullptr)
 	, mServer(0)
 	, mValid(false)
 	{}
 	WebServer(SD &sd, uint16_t port)
-	: mSd(sd)
+	: mSd(&sd)
 	, mServer(port)
 	, mValid(true)
 	{}
@@ -127,11 +127,11 @@ public:
 	}
 	void getFile(File32 &file, const char *path) override
 	{
-		file = mSd.open(path, FILE_READ);
+		file = mSd->open(path, FILE_READ);
 	}
 	bool exists(const char *path) override
 	{
-		return (mSd.exists(path));
+		return (mSd->exists(path));
 	}
 
 	size_t accept()
